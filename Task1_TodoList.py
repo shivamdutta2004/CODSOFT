@@ -29,17 +29,33 @@ if st.button("Add Task"):
         st.session_state.message = "Please enter a valid task."
 
 # ---------------------- Show Tasks ----------------------
+# ---------------------- Show Tasks ----------------------
 st.subheader("Your Tasks")
 
 if len(st.session_state.tasks) == 0:
     st.info("No tasks added yet.")
 else:
     for index, task in enumerate(st.session_state.tasks):
-        col1, col2 = st.columns([4, 1])
+        col1, col2, col3 = st.columns([4, 1, 1])
 
-        col1.write(f"{index + 1}. {task}")
+        # Display task or edit input
+        if f"edit_{index}" in st.session_state and st.session_state[f"edit_{index}"]:
+            new_value = col1.text_input("Edit Task", value=task, key=f"input_{index}")
 
-        if col2.button("Delete", key=f"delete_{index}"):
+            if col2.button("Save", key=f"save_{index}"):
+                if new_value.strip() != "":
+                    st.session_state.tasks[index] = new_value
+                    st.session_state[f"edit_{index}"] = False
+                    st.session_state.message = "Task updated successfully!"
+                    st.rerun()
+        else:
+            col1.write(f"{index + 1}. {task}")
+
+            if col2.button("Edit", key=f"editbtn_{index}"):
+                st.session_state[f"edit_{index}"] = True
+
+        # Delete button (always visible)
+        if col3.button("Delete", key=f"delete_{index}"):
             st.session_state.tasks.pop(index)
             st.session_state.message = "Task deleted successfully!"
             st.rerun()
